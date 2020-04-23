@@ -14,7 +14,6 @@ if(is_logined() === false){
 $db = get_db_connect();
 $user = get_login_user($db);
 
-
 $item_id = get_post('item_id');
 
 if(add_cart($db,$user['user_id'], $item_id)){
