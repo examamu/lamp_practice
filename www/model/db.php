@@ -16,10 +16,19 @@ function get_db_connect(){
   return $dbh;
 }
 
-function fetch_query($db, $sql, $params = array()){
+function fetch_query($db, $sql, $params){
   try{
     $statement = $db->prepare($sql);
-    $statement->execute($params);
+    if(!empty($params)){
+      foreach($params as $data){
+        if($data[2] === 'int'){
+          $statement->bindValue($data[0], $data[1], PDO::PARAM_INT);
+        }else{
+          $statement->bindValue($data[0], $data[1], PDO::PARAM_STR);
+        }
+      }
+    }
+    $statement->execute();
     return $statement->fetch();
   }catch(PDOException $e){
     set_error('データ取得に失敗しました。');
@@ -27,10 +36,19 @@ function fetch_query($db, $sql, $params = array()){
   return false;
 }
 
-function fetch_all_query($db, $sql, $params = array()){
+function fetch_all_query($db, $sql, $params){
   try{
     $statement = $db->prepare($sql);
-    $statement->execute($params);
+    if(!empty($params)){
+      foreach($params as $data){
+        if($data[2] === 'int'){
+          $statement->bindValue($data[0], $data[1], PDO::PARAM_INT);
+        }else{
+          $statement->bindValue($data[0], $data[1], PDO::PARAM_STR);
+        }
+      }
+    }
+    $statement->execute();
     return $statement->fetchAll();
   }catch(PDOException $e){
     set_error('データ取得に失敗しました。');
@@ -38,10 +56,21 @@ function fetch_all_query($db, $sql, $params = array()){
   return false;
 }
 
-function execute_query($db, $sql, $params = array()){
+
+
+function execute_query($db, $sql, $params){
   try{
     $statement = $db->prepare($sql);
-    return $statement->execute($params);
+    if(!empty($params)){
+      foreach($params as $data){
+        if($data[2] === 'int'){
+          $statement->bindValue($data[0], $data[1], PDO::PARAM_INT);
+        }else{
+          $statement->bindValue($data[0], $data[1], PDO::PARAM_STR);
+        }
+      }
+    }
+    return $statement->execute();
   }catch(PDOException $e){
     set_error('更新に失敗しました。');
   }

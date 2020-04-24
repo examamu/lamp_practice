@@ -16,10 +16,12 @@ function get_item($db, $item_id){
     FROM
       items
     WHERE
-      item_id = {$item_id}
+      item_id = ?
   ";
-
-  return fetch_query($db, $sql);
+  $params = array(
+    array(1,$item_id,'int')
+  );
+  return fetch_query($db, $sql, $params);
 }
 
 function get_items($db, $is_open = false){
@@ -39,8 +41,9 @@ function get_items($db, $is_open = false){
       WHERE status = 1
     ';
   }
+  $params = array();
 
-  return fetch_all_query($db, $sql);
+  return fetch_all_query($db, $sql, $params);
 }
 
 function get_all_items($db){
@@ -82,10 +85,16 @@ function insert_item($db, $name, $price, $stock, $filename, $status){
         image,
         status
       )
-    VALUES('{$name}', {$price}, {$stock}, '{$filename}', {$status_value});
+    VALUES(?,?,?,?,?)
   ";
-
-  return execute_query($db, $sql);
+  $params = array(
+    array(1,$name,'str'),
+    array(2,$price,'int'),
+    array(3,$stock,'int'),
+    array(4,$filename,'str'),
+    array(5,$status_value,'int')
+  );
+  return execute_query($db, $sql, $params);
 }
 
 function update_item_status($db, $item_id, $status){
@@ -93,13 +102,16 @@ function update_item_status($db, $item_id, $status){
     UPDATE
       items
     SET
-      status = {$status}
+      status = ?
     WHERE
-      item_id = {$item_id}
+      item_id = ?
     LIMIT 1
   ";
-  
-  return execute_query($db, $sql);
+  $params = array(
+      array(1,$status,'int'),
+      array(2,$item_id,'int')
+    );
+  return execute_query($db, $sql, $params);
 }
 
 function update_item_stock($db, $item_id, $stock){
@@ -107,13 +119,16 @@ function update_item_stock($db, $item_id, $stock){
     UPDATE
       items
     SET
-      stock = {$stock}
+      stock = ?
     WHERE
-      item_id = {$item_id}
+      item_id = ?
     LIMIT 1
   ";
-  
-  return execute_query($db, $sql);
+  $params = array(
+    array(1,$stock,'int'),
+    array(2,$item_id,'int')
+  );
+  return execute_query($db, $sql, $params);
 }
 
 function destroy_item($db, $item_id){
@@ -136,13 +151,14 @@ function delete_item($db, $item_id){
     DELETE FROM
       items
     WHERE
-      item_id = {$item_id}
+      item_id = ?
     LIMIT 1
   ";
-  
-  return execute_query($db, $sql);
+  $params = array(
+      array(1,$item_id,'int')
+  );
+  return execute_query($db, $sql, $params);
 }
-
 
 // 非DB
 
@@ -206,3 +222,5 @@ function is_valid_item_status($status){
   }
   return $is_valid;
 }
+
+?>
