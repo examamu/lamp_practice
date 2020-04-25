@@ -16,6 +16,7 @@ $user = get_login_user($db);
 
 $carts = get_user_carts($db, $user['user_id']);
 
+//ここから始める
 if(purchase_carts($db, $carts) === false){
   set_error('商品が購入できませんでした。');
   redirect_to(CART_URL);

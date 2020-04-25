@@ -16,10 +16,14 @@ $user = get_login_user($db);
 
 $item_id = get_post('item_id');
 
-if(add_cart($db,$user['user_id'], $item_id)){
-  set_message('カートに商品を追加しました。');
-} else {
-  set_error('カートの更新に失敗しました。');
+
+if(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']){
+  if(add_cart($db,$user['user_id'], $item_id)){
+    set_message('カートに商品を追加しました。');
+  } else {
+    set_error('カートの更新に失敗しました。');
+  }
+unset($_SESSION['csrf_token']);
 }
 
 redirect_to(HOME_URL);

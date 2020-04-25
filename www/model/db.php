@@ -19,7 +19,6 @@ function get_db_connect(){
 function fetch_query($db, $sql, $params){
   try{
     $statement = $db->prepare($sql);
-    if(!empty($params)){
       foreach($params as $data){
         if($data[2] === 'int'){
           $statement->bindValue($data[0], $data[1], PDO::PARAM_INT);
@@ -27,7 +26,6 @@ function fetch_query($db, $sql, $params){
           $statement->bindValue($data[0], $data[1], PDO::PARAM_STR);
         }
       }
-    }
     $statement->execute();
     return $statement->fetch();
   }catch(PDOException $e){
@@ -39,7 +37,6 @@ function fetch_query($db, $sql, $params){
 function fetch_all_query($db, $sql, $params){
   try{
     $statement = $db->prepare($sql);
-    if(!empty($params)){
       foreach($params as $data){
         if($data[2] === 'int'){
           $statement->bindValue($data[0], $data[1], PDO::PARAM_INT);
@@ -47,7 +44,7 @@ function fetch_all_query($db, $sql, $params){
           $statement->bindValue($data[0], $data[1], PDO::PARAM_STR);
         }
       }
-    }
+
     $statement->execute();
     return $statement->fetchAll();
   }catch(PDOException $e){
@@ -61,7 +58,6 @@ function fetch_all_query($db, $sql, $params){
 function execute_query($db, $sql, $params){
   try{
     $statement = $db->prepare($sql);
-    if(!empty($params)){
       foreach($params as $data){
         if($data[2] === 'int'){
           $statement->bindValue($data[0], $data[1], PDO::PARAM_INT);
@@ -69,7 +65,6 @@ function execute_query($db, $sql, $params){
           $statement->bindValue($data[0], $data[1], PDO::PARAM_STR);
         }
       }
-    }
     return $statement->execute();
   }catch(PDOException $e){
     set_error('更新に失敗しました。');
