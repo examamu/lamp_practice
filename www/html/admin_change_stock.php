@@ -21,10 +21,15 @@ if(is_admin($user) === false){
 $item_id = get_post('item_id');
 $stock = get_post('stock');
 
-if(update_item_stock($db, $item_id, $stock)){
-  set_message('在庫数を変更しました。');
-} else {
-  set_error('在庫数の変更に失敗しました。');
+if(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']){
+  if(update_item_stock($db, $item_id, $stock)){
+    set_message('在庫数を変更しました。');
+  } else {
+    set_error('在庫数の変更に失敗しました。');
+  }
+  unset($_SESSION['csrf_token']);
+}else{
+  set_error('不正な操作です。');
 }
 
 redirect_to(ADMIN_URL);

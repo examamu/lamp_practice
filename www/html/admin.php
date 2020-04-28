@@ -14,6 +14,8 @@ $db = get_db_connect();
 
 $user = get_login_user($db);
 
+$csrf_token = csrf_token();
+
 if(is_admin($user) === false){
   redirect_to(LOGIN_URL);
 }
