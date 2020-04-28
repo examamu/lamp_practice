@@ -24,6 +24,8 @@ if(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token
     set_error('カートの更新に失敗しました。');
   }
 unset($_SESSION['csrf_token']);
+}else{
+  set_error('不正な操作です。');
 }
 
 redirect_to(HOME_URL);
