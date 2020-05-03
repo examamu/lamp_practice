@@ -18,19 +18,11 @@ $carts = get_user_carts($db, $user['user_id']);
 try{
   $db->beginTransaction();
 
+  //購入時に在庫数を一つ減らしカートから削除する処理
   purchase_carts($db, $carts);
   $user_id = $user['user_id'];
   $purchase_data = new Order($db, $user_id);
-  $purchase_data->insert_order_historys();
-  $order_id = $db->lastInsertId('id');
-
-//オーダーIDを取得
-  foreach($carts as $cart){
-    $item_id = $cart['item_id'];
-    $order_price = $cart['price'];
-    $amount = $cart['amount'];
-    $purchase_data->insert_order_item_historys($order_id,$item_id,$order_price,$amount);
-  }
+  $purchase_data->insert_order_historys($carts);
   $db->commit();
 }catch(PDOException $e){
   $db->rollBack();
