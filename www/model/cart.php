@@ -175,3 +175,41 @@ function validate_cart_purchase($carts){
   return true;
 }
 
+Class Order{ 
+
+  function __construct($db,$user_id)
+  {
+    $this->db = $db;
+    $this->user_id = $user_id;
+  }
+
+  public function insert_order_historys($carts){
+    $sql = "INSERT INTO order_historys(user_id,order_datetime) VALUES(?,?)";
+    $datetime = date('YmdHis');
+    $params = array(
+        array(1,$this->user_id,'int'),
+        array(2,$datetime,'str')
+    );
+    execute_query($this->db, $sql, $params);
+
+    $order_id = $this->db->lastInsertId('id');
+    foreach ($carts as $cart){
+      $item_id = $cart['item_id'];
+      $order_price = $cart['price'];
+      $amount = $cart['amount'];
+      $this->insert_order_item_historys($order_id,$item_id,$order_price,$amount);
+    }
+  }
+
+  private function insert_order_item_historys($order_id,$item_id,$order_price,$amount){
+    $sql = "INSERT INTO order_item_historys(order_id,item_id,order_price,amount) VALUES(?,?,?,?)";
+    $params = array(
+      array(1,$order_id,'int'),
+      array(2,$item_id,'int'),
+      array(3,$order_price,'int'),
+      array(4,$amount,'int')
+  );
+  return execute_query($this->db, $sql, $params);
+  }
+
+}
