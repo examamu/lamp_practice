@@ -48,7 +48,7 @@ function fetch_all_query($db, $sql, $params){
     $statement->execute();
     return $statement->fetchAll();
   }catch(PDOException $e){
-    set_error('データ取得に失敗しました。');
+    set_error('データ取得に失敗しました。'.$e->getMessage());
   }
   return false;
 }
