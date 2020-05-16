@@ -282,7 +282,7 @@ function count_item_num($page_num,$pages,$items){
     if($page_num === 1){
       $item_first_child_num = 1;
     }else{
-      $item_first_child_num = $page_num + DISPLAY_LIMIT - 1;
+      $item_first_child_num = ($page_num -1) * DISPLAY_LIMIT +1;
     }
     $item_last_child_num = $item_first_child_num + count($items) -1;
   }else{
