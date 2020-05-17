@@ -46,12 +46,40 @@ function get_items($db, $is_open = false){
   return fetch_all_query($db, $sql, $params);
 }
 
+function get_items_limit($db,$page_num){
+  $sql = '
+    SELECT
+      item_id, 
+      name,
+      stock,
+      price,
+      image,
+      status
+    FROM
+      items
+    WHERE
+      status = 1
+    LIMIT ?
+    OFFSET ?
+  ';
+  $params = array(
+    array(1,DISPLAY_LIMIT,'int'),
+    array(2,$page_num,'int')
+    
+  );
+
+  return fetch_all_query($db, $sql, $params);
+}
+
+
+
 function get_all_items($db){
   return get_items($db);
 }
 
-function get_open_items($db){
-  return get_items($db, true);
+function get_open_items($db,$page_num){
+  $page_num = ($page_num - 1) * DISPLAY_LIMIT;
+  return get_items_limit($db,$page_num);
 }
 
 function regist_item($db, $name, $price, $stock, $status, $image){
@@ -222,5 +250,72 @@ function is_valid_item_status($status){
   }
   return $is_valid;
 }
+
+
+
+
+
+function page_num($get_page){
+  if(isset($get_page) === TRUE){
+    if(is_valid_page_num($get_page) === TRUE){
+      $page_num = intval($get_page);
+    }else{
+      $page_num = 1;
+    }
+  }else{
+    $page_num = 1;
+  }
+  return $page_num;
+}
+
+function is_valid_page_num($page_num){
+  $is_valid = true;
+  if(preg_match(REGEXP_POSITIVE_INTEGER,$page_num) === 0){
+    set_error('ページがありません指定をもう一度ご確認ください');
+    $is_valid = false;
+  }
+  return $is_valid;
+}
+
+function count_item_num($page_num,$pages,$items){
+  if($page_num <= $pages && $page_num > 0){
+    if($page_num === 1){
+      $item_first_child_num = 1;
+    }else{
+      $item_first_child_num = ($page_num -1) * DISPLAY_LIMIT +1;
+    }
+    $item_last_child_num = $item_first_child_num + count($items) -1;
+  }else{
+    $item_first_child_num = '';
+    $item_last_child_num = '';
+    set_error('ページがありません指定をもう一度ご確認ください');
+  }
+  $count_item_num = array($item_first_child_num, $item_last_child_num);
+
+  return $count_item_num;
+}
+
+function active_page($page_num,$i){
+  if($page_num === $i){
+    return 'active';
+  }else{
+    return '';
+  }
+}
+
+
+function before_page_button($page_num){
+  return "./?page=".($page_num - 1);
+}
+
+function next_page_button($page_num){
+  return "./?page=".($page_num + 1);
+}
+
+
+
+
+
+
 
 ?>
