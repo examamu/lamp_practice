@@ -21,9 +21,12 @@ function get_user_carts($db, $user_id){
     ON
       carts.item_id = items.item_id
     WHERE
-      carts.user_id = {$user_id}
+      carts.user_id = ?
   ";
-  return fetch_all_query($db, $sql);
+  $params = array(
+    array(1,$user_id,'int')
+  );
+  return fetch_all_query($db, $sql, $params);
 }
 
 function get_user_cart($db, $user_id, $item_id){
@@ -45,12 +48,15 @@ function get_user_cart($db, $user_id, $item_id){
     ON
       carts.item_id = items.item_id
     WHERE
-      carts.user_id = {$user_id}
+      carts.user_id = ?
     AND
-      items.item_id = {$item_id}
+      items.item_id = ?
   ";
-
-  return fetch_query($db, $sql);
+  $params = array(
+    array(1,$user_id,'int'),
+    array(2,$item_id,'int')
+  );
+  return fetch_query($db, $sql, $params);
 
 }
 
@@ -70,10 +76,14 @@ function insert_cart($db, $user_id, $item_id, $amount = 1){
         user_id,
         amount
       )
-    VALUES({$item_id}, {$user_id}, {$amount})
+    VALUES(?, ?, ?)
   ";
-
-  return execute_query($db, $sql);
+  $params = array(
+    array(1,$item_id,'int'),
+    array(2,$user_id,'int'),
+    array(3,$amount,'int')
+  );
+  return execute_query($db, $sql, $params);
 }
 
 function update_cart_amount($db, $cart_id, $amount){
@@ -81,12 +91,16 @@ function update_cart_amount($db, $cart_id, $amount){
     UPDATE
       carts
     SET
-      amount = {$amount}
+      amount = ?
     WHERE
-      cart_id = {$cart_id}
+      cart_id = ?
     LIMIT 1
   ";
-  return execute_query($db, $sql);
+  $params = array(
+    array(1,$amount,'int'),
+    array(2,$cart_id,'int')
+  );
+  return execute_query($db, $sql, $params);
 }
 
 function delete_cart($db, $cart_id){
@@ -94,11 +108,13 @@ function delete_cart($db, $cart_id){
     DELETE FROM
       carts
     WHERE
-      cart_id = {$cart_id}
+      cart_id = ?
     LIMIT 1
   ";
-
-  return execute_query($db, $sql);
+  $params = array(
+      array(1,$cart_id,'int')
+  );
+  return execute_query($db, $sql, $params);
 }
 
 function purchase_carts($db, $carts){
@@ -125,8 +141,10 @@ function delete_user_carts($db, $user_id){
     WHERE
       user_id = {$user_id}
   ";
-
-  execute_query($db, $sql);
+  $params = array(
+    array(1,$user_id,'int')
+  );
+  execute_query($db, $sql, $params);
 }
 
 
@@ -157,3 +175,41 @@ function validate_cart_purchase($carts){
   return true;
 }
 
+Class Order{ 
+
+  function __construct($db,$user_id)
+  {
+    $this->db = $db;
+    $this->user_id = $user_id;
+  }
+
+  public function insert_order_historys($carts){
+    $sql = "INSERT INTO order_historys(user_id,order_datetime) VALUES(?,?)";
+    $datetime = date('YmdHis');
+    $params = array(
+        array(1,$this->user_id,'int'),
+        array(2,$datetime,'str')
+    );
+    execute_query($this->db, $sql, $params);
+
+    $order_id = $this->db->lastInsertId('id');
+    foreach ($carts as $cart){
+      $item_id = $cart['item_id'];
+      $order_price = $cart['price'];
+      $amount = $cart['amount'];
+      $this->insert_order_item_historys($order_id,$item_id,$order_price,$amount);
+    }
+  }
+
+  private function insert_order_item_historys($order_id,$item_id,$order_price,$amount){
+    $sql = "INSERT INTO order_item_historys(order_id,item_id,order_price,amount) VALUES(?,?,?,?)";
+    $params = array(
+      array(1,$order_id,'int'),
+      array(2,$item_id,'int'),
+      array(3,$order_price,'int'),
+      array(4,$amount,'int')
+  );
+  return execute_query($this->db, $sql, $params);
+  }
+
+}

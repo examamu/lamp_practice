@@ -135,3 +135,13 @@ function is_valid_upload_image($image){
   return true;
 }
 
+function h($s){
+  return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+}
+
+function csrf_token(){
+  $toke_byte = openssl_random_pseudo_bytes(16);
+  $csrf_token = bin2hex($toke_byte);
+  $_SESSION['csrf_token'] = $csrf_token;
+  return $csrf_token;
+}
