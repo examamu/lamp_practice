@@ -16,23 +16,22 @@
     <!--メインイメージ-->
     <div class = "slider_area">
       <div class = "main_img full_screen slider">
-        <div><img class = "swiper-slide" src = "<?php print (IMAGE_PATH . 'slide01.jpg'); ?>"></div>
+        <div><img class = "swiper-slide" src = "<?php print (IMAGE_PATH . 'IoTIMGL3531_TP_V.jpg'); ?>"></div>
+        <span>パーツ販売サイト PartsMarket</span>
       </div>
     </div>
 
     <h1><?php echo $page_title ?></h1>
     <?php include VIEW_PATH . 'templates/messages.php'; ?>
 
-    <div class="card-deck">
-      <div class="row">
+    <div class="item_container">
       <?php foreach($items as $item){ ?>
-        <div class="col-6 item">
-          <div class="card h-100 text-center">
-            <div class="card-header">
+        <div class="item_wrapper">
+            <div class="item_name">
               <?php print(h($item['name'])); ?>
             </div>
-            <figure class="card-body">
-              <img class="card-img" src="<?php print(IMAGE_PATH . $item['image']); ?>">
+            <figure>
+              <img class="item_img" src="<?php print(IMAGE_PATH . $item['image']); ?>">
               <figcaption>
                 <?php print(number_format($item['price'])); ?>円
                 <?php if($item['stock'] > 0){ ?>
@@ -46,12 +45,10 @@
                 <?php } ?>
               </figcaption>
             </figure>
-          </div>
         </div>
       <?php } ?>
-      </div>
     </div>
-<?php include VIEW_PATH . 'templates/pagenation.php'; ?>
+<?php include VIEW_PATH . 'templates/pagination.php'; ?>
     </main>
   </div>
 

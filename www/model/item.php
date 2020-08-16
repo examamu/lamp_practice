@@ -76,6 +76,21 @@ function get_items_limit($db,$page_num){
 }
 
 
+function category($db,$page_num,$categories){
+  $page_title = $categories[$_GET['category']-1]['name'];
+  setcookie('category',$_GET['category'],time()+60+60);
+  setcookie('search_word',$_GET['search_word'],time()-1);
+  //カテゴリー仕分けしたitems
+  $items = get_category_items($db,$page_num,$_GET['category']);
+  //アイテム総数
+  $all_items = get_category_all_items($db,$_GET['category']);
+
+  return array(
+    'items'=> $items,
+    'all_items' => $all_items,
+    'page_title' => $page_title
+  );
+}
 
 function get_category_all_items($db,$category_id){
   $sql = "
@@ -132,6 +147,25 @@ function get_category_items($db,$page_num,$category_id){
 }
 
 
+
+
+
+
+//検索機能
+function search_word($db,$page_num){
+    setcookie('category',$_GET['category'],time()-1);
+    setcookie('search_word',$_GET['search_word'],time()+60+60);
+    $search_word = $_GET['search_word'];
+    $items = get_search_word_items($db,$page_num,$search_word);
+    $all_items = get_search_word_all_items($db,$search_word);
+    //ページのタイトル
+    $page_title = 'キーワード検索「'.$_GET['search_word'].'」';
+  return array(
+    'items'=> $items,
+    'all_items' => $all_items,
+    'page_titile' => $page_title
+  );
+}
 
 function get_search_word_items($db,$page_num,$search_word){
   $sql = '

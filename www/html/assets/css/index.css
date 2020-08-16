@@ -1,17 +1,31 @@
-.card{
-  min-width:  50%;
+.item_container{
+  width: calc(100% - 32px);
+  margin: 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
 
-.card-body{
-  max-height: 400px;
+.item_wrapper{
+  border: 1px solid #ececec;
+  margin-bottom: 16px;
 }
 
-.card-img{
-  height: 300px;
-  width: auto;
-  max-width: 100%;
+.item_name{
+  width: 100%;
+  max-width: 400px;
+  background: #ececec;
+  padding: 16px;
+  text-align: center;
+}
+
+.item_img{
+  width: 400px;
+  height: 400px;
   object-fit: contain;
 }
+
+
 
 .index_container{
   margin: 0 auto;
@@ -31,24 +45,42 @@
 }
 
 .main_img img{
+  width: 100%;
   height: 400px;
-  width: auto;
+  object-fit: cover;
   display: block;
   margin: 0 auto;
 }
 
+.main_img span{
+  font-size: 40px;
+  text-align: center;
+  position: absolute;
+  top: 25%;
+  left: 3%;
+}
+
 #index_main{
   padding: 8px;
-  border:1px solid #000;
   flex: 8;
 }
 
 /*サイドバー*/
 .sidebar{
   padding: 8px;
-  border: 1px solid #000;
   margin-right: 10px;
   flex: 2;
 }
 
+.pagination_nav{
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  
+}
+
+.pagination{
+  justify-content: center;
+}
 

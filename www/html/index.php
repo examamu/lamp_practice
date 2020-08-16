@@ -7,6 +7,7 @@ require_once '../model/category.php';
 require_once '../model/cookie.php';
 
 session_start();
+reset_cookies();
 
 if(is_logined() === false){
   redirect_to(LOGIN_URL);
@@ -20,30 +21,24 @@ $page_num = page_num($_GET['page']);
 //カテゴリー一覧
 $categories = get_all_categories($db);
 
+//単に取得したitems
+$items = get_open_items($db,$page_num);
+//アイテム総数
+$all_items = get_items($db,true);
 
 //表示アイテム
 if(isset($_GET['category']) === TRUE){
-  $page_title = $categories[$_GET['category']-1]['name'];
-  setcookie('category',$_GET['category'],time()+60+60);
-  setcookie('search_word',$_GET['search_word'],time()-1);
-  //カテゴリー仕分けしたitems
-  $items = get_category_items($db,$page_num,$_GET['category']);
-  //アイテム総数
-  $all_items = get_category_all_items($db,$_GET['category']);
-}else{
-  //単に取得したitems
-  $items = get_open_items($db,$page_num);
-  //アイテム総数
-  $all_items = get_items($db,true);
+  $get_category = category($db,$page_num,$categories);
+  $items = $get_category['items'];
+  $all_items = $get_category['all_items'];
+  $page_title = $get_category['page_title'];
 }
-
 //ワード検索機能
 if(isset($_GET['search_word']) === TRUE){
-  setcookie('category',$_GET['category'],time()-1);
-  setcookie('search_word',$_GET['search_word'],time()+60+60);
-  $search_word = $_GET['search_word'];
-  $items = get_search_word_items($db,$page_num,$search_word);
-  $all_items = get_search_word_all_items($db,$search_word);
+  $get_search_word = search_word($db,$page_num);
+  $items = $get_search_word['items'];
+  $all_items = $get_search_word['all_items'];
+  $page_title = $get_search_word['page_title'];
 }
 
 //総ページ数
@@ -57,10 +52,8 @@ if(isset($_COOKIE['category']) === TRUE){
 }elseif(isset($_COOKIE['search_word']) ===TRUE){
   $cookie = '&?search_word='.$_COOKIE['search_word'];
 }else{
-  $cookie = "&?search_word=";
+  $cookie = "";
 }
 
 $csrf_token = csrf_token();
 include_once VIEW_PATH . 'index_view.php';
-
-echo $cookie;
