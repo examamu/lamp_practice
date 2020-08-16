@@ -1,3 +1,54 @@
+.card{
+  min-width:  50%;
+}
+
+.card-body{
+  max-height: 400px;
+}
+
+.card-img{
+  height: 300px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.index_container{
+  margin: 0 auto;
+  max-width: 1370px;
+  display: flex;
+}
+
 .item {
   margin-top: 10px;
 }
+
+.main_img{
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto 16px;
+  position: relative;
+}
+
+.main_img img{
+  height: 400px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+#index_main{
+  padding: 8px;
+  border:1px solid #000;
+  flex: 8;
+}
+
+/*サイドバー*/
+.sidebar{
+  padding: 8px;
+  border: 1px solid #000;
+  margin-right: 10px;
+  flex: 2;
+}
+
+
