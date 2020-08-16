@@ -24,6 +24,8 @@ function get_item($db, $item_id){
   return fetch_query($db, $sql, $params);
 }
 
+
+
 function get_items($db, $is_open = false){
   $sql = '
     SELECT
@@ -45,6 +47,8 @@ function get_items($db, $is_open = false){
 
   return fetch_all_query($db, $sql, $params);
 }
+
+
 
 function get_items_limit($db,$page_num){
   $sql = '
@@ -72,27 +76,169 @@ function get_items_limit($db,$page_num){
 }
 
 
+function category($db,$page_num,$categories){
+  $page_title = $categories[$_GET['category']-1]['name'];
+  setcookie('category',$_GET['category'],time()+60+60);
+  setcookie('search_word',$_GET['search_word'],time()-1);
+  //カテゴリー仕分けしたitems
+  $items = get_category_items($db,$page_num,$_GET['category']);
+  //アイテム総数
+  $all_items = get_category_all_items($db,$_GET['category']);
+
+  return array(
+    'items'=> $items,
+    'all_items' => $all_items,
+    'page_title' => $page_title
+  );
+}
+
+function get_category_all_items($db,$category_id){
+  $sql = "
+    SELECT
+      item_id, items.name, stock, price, image, status
+    FROM
+      items
+    JOIN
+      categories
+    ON
+      items.category_id = categories.id
+    WHERE
+      status = 1
+    AND
+      categories.id = ?
+    ";
+
+  $params = array(
+    array(1,$category_id,'int')
+  );
+
+  return fetch_all_query($db, $sql, $params);
+}
+
+
+
+function get_category_items($db,$page_num,$category_id){
+  $sql = "
+    SELECT
+      item_id, items.name, stock, price, image, status
+    FROM
+      items
+    JOIN
+      categories
+    ON
+      items.category_id = categories.id
+    WHERE
+      status = 1
+    AND
+      categories.id = ?
+    LIMIT ?
+    OFFSET ?";
+
+  if($page_num === 1){
+    $page_num = 0;
+  }
+  $params = array(
+    array(1,$category_id,'int'),
+    array(2,DISPLAY_LIMIT,'int'),
+    array(3,$page_num,'int')
+  );
+
+  return fetch_all_query($db, $sql, $params);
+}
+
+
+
+
+
+
+//検索機能
+function search_word($db,$page_num){
+    setcookie('category',$_GET['category'],time()-1);
+    setcookie('search_word',$_GET['search_word'],time()+60+60);
+    $search_word = $_GET['search_word'];
+    $items = get_search_word_items($db,$page_num,$search_word);
+    $all_items = get_search_word_all_items($db,$search_word);
+    //ページのタイトル
+    $page_title = 'キーワード検索「'.$_GET['search_word'].'」';
+  return array(
+    'items'=> $items,
+    'all_items' => $all_items,
+    'page_titile' => $page_title
+  );
+}
+
+function get_search_word_items($db,$page_num,$search_word){
+  $sql = '
+    SELECT
+      item_id, name, stock, price, image, status
+    FROM
+      items
+    WHERE
+      status = 1
+    AND
+      name
+    LIKE ?
+    LIMIT ?
+    OFFSET ?
+  ';
+  if($page_num === 1){
+    $page_num = 0;
+  }
+  $params = array(
+    array(1,'%'.$search_word.'%','str'),
+    array(2,DISPLAY_LIMIT,'int'),
+    array(3,$page_num,'int')
+  );
+  return fetch_all_query($db, $sql, $params);
+}
+
+function get_search_word_all_items($db,$search_word){
+  $sql = '
+    SELECT
+      item_id, name, stock, price, image, status
+    FROM
+      items
+    WHERE
+      status = 1
+    AND
+      name
+    LIKE ?
+  ';
+
+  $params = array(
+    array(1,'%'.$search_word.'%','str')
+  );
+  return fetch_all_query($db, $sql, $params);
+}
+
+
 
 function get_all_items($db){
   return get_items($db);
 }
+
+
 
 function get_open_items($db,$page_num){
   $page_num = ($page_num - 1) * DISPLAY_LIMIT;
   return get_items_limit($db,$page_num);
 }
 
-function regist_item($db, $name, $price, $stock, $status, $image){
+
+
+function regist_item($db, $name, $category_id, $price, $stock, $status, $image){
   $filename = get_upload_filename($image);
-  if(validate_item($name, $price, $stock, $filename, $status) === false){
+  if(validate_item($name, $category_id, $price, $stock, $filename, $status) === false){
     return false;
   }
-  return regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename);
+  return regist_item_transaction($db, $name, $category_id, $price, $stock, $status, $image, $filename);
 }
 
-function regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename){
+
+
+function regist_item_transaction($db, $name, $category_id, $price, $stock, $status, $image, $filename){
   $db->beginTransaction();
-  if(insert_item($db, $name, $price, $stock, $filename, $status) 
+  if(insert_item($db, $name, $category_id, $price, $stock, $filename, $status) 
     && save_image($image, $filename)){
     $db->commit();
     return true;
@@ -102,28 +248,34 @@ function regist_item_transaction($db, $name, $price, $stock, $status, $image, $f
   
 }
 
-function insert_item($db, $name, $price, $stock, $filename, $status){
+
+
+function insert_item($db, $name, $category_id, $price, $stock, $filename, $status){
   $status_value = PERMITTED_ITEM_STATUSES[$status];
   $sql = "
     INSERT INTO
       items(
         name,
+        category_id,
         price,
         stock,
         image,
         status
       )
-    VALUES(?,?,?,?,?)
+    VALUES(?,?,?,?,?,?)
   ";
   $params = array(
     array(1,$name,'str'),
-    array(2,$price,'int'),
-    array(3,$stock,'int'),
-    array(4,$filename,'str'),
-    array(5,$status_value,'int')
+    array(2,$category_id,'int'),
+    array(3,$price,'int'),
+    array(4,$stock,'int'),
+    array(5,$filename,'str'),
+    array(6,$status_value,'int')
   );
   return execute_query($db, $sql, $params);
 }
+
+
 
 function update_item_status($db, $item_id, $status){
   $sql = "
@@ -142,6 +294,8 @@ function update_item_status($db, $item_id, $status){
   return execute_query($db, $sql, $params);
 }
 
+
+
 function update_item_stock($db, $item_id, $stock){
   $sql = "
     UPDATE
@@ -159,6 +313,8 @@ function update_item_stock($db, $item_id, $stock){
   return execute_query($db, $sql, $params);
 }
 
+
+
 function destroy_item($db, $item_id){
   $item = get_item($db, $item_id);
   if($item === false){
@@ -174,6 +330,8 @@ function destroy_item($db, $item_id){
   return false;
 }
 
+
+
 function delete_item($db, $item_id){
   $sql = "
     DELETE FROM
@@ -188,11 +346,18 @@ function delete_item($db, $item_id){
   return execute_query($db, $sql, $params);
 }
 
+
+
+
+
+
 // 非DB
 
 function is_open($item){
   return $item['status'] === 1;
 }
+
+
 
 function validate_item($name, $price, $stock, $filename, $status){
   $is_valid_item_name = is_valid_item_name($name);
@@ -208,6 +373,8 @@ function validate_item($name, $price, $stock, $filename, $status){
     && $is_valid_item_status;
 }
 
+
+
 function is_valid_item_name($name){
   $is_valid = true;
   if(is_valid_length($name, ITEM_NAME_LENGTH_MIN, ITEM_NAME_LENGTH_MAX) === false){
@@ -216,6 +383,8 @@ function is_valid_item_name($name){
   }
   return $is_valid;
 }
+
+
 
 function is_valid_item_price($price){
   $is_valid = true;
@@ -226,6 +395,8 @@ function is_valid_item_price($price){
   return $is_valid;
 }
 
+
+
 function is_valid_item_stock($stock){
   $is_valid = true;
   if(is_positive_integer($stock) === false){
@@ -235,6 +406,8 @@ function is_valid_item_stock($stock){
   return $is_valid;
 }
 
+
+
 function is_valid_item_filename($filename){
   $is_valid = true;
   if($filename === ''){
@@ -242,6 +415,8 @@ function is_valid_item_filename($filename){
   }
   return $is_valid;
 }
+
+
 
 function is_valid_item_status($status){
   $is_valid = true;
@@ -268,6 +443,8 @@ function page_num($get_page){
   return $page_num;
 }
 
+
+
 function is_valid_page_num($page_num){
   $is_valid = true;
   if(preg_match(REGEXP_POSITIVE_INTEGER,$page_num) === 0){
@@ -276,6 +453,8 @@ function is_valid_page_num($page_num){
   }
   return $is_valid;
 }
+
+
 
 function count_item_num($page_num,$pages,$items){
   if($page_num <= $pages && $page_num > 0){
@@ -295,6 +474,8 @@ function count_item_num($page_num,$pages,$items){
   return $count_item_num;
 }
 
+
+
 function active_page($page_num,$i){
   if($page_num === $i){
     return 'active';
@@ -304,9 +485,12 @@ function active_page($page_num,$i){
 }
 
 
+
 function before_page_button($page_num){
   return "./?page=".($page_num - 1);
 }
+
+
 
 function next_page_button($page_num){
   return "./?page=".($page_num + 1);

@@ -1,0 +1,20 @@
+.sidebar{
+    background: #ffffff;
+    padding: 8px;
+    margin-right: 10px;
+    flex: 2;
+  }
+
+.sidebar_search_box{
+    margin-bottom: 32px;
+}
+
+.side_nav_inner ul li{
+    padding: 8px 0;
+    border-top: 1px dotted #000;
+}
+
+.side_nav_inner ul li:first-child{
+    border: none;
+}
+

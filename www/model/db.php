@@ -16,7 +16,7 @@ function get_db_connect(){
   return $dbh;
 }
 
-function fetch_query($db, $sql, $params){
+function fetch_query($db, $sql, $params = array()){
   try{
     $statement = $db->prepare($sql);
       foreach($params as $data){
@@ -34,7 +34,7 @@ function fetch_query($db, $sql, $params){
   return false;
 }
 
-function fetch_all_query($db, $sql, $params){
+function fetch_all_query($db, $sql, $params = array()){
   try{
     $statement = $db->prepare($sql);
       foreach($params as $data){
@@ -55,7 +55,7 @@ function fetch_all_query($db, $sql, $params){
 
 
 
-function execute_query($db, $sql, $params){
+function execute_query($db, $sql, $params = array()){
   try{
     $statement = $db->prepare($sql);
       foreach($params as $data){
